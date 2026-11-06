@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#11130f" />
+    <meta name="description" content="在你的瀏覽器裡，用 Demucs 分離音軌、升降 Key，製作專屬伴奏。檔案只在本機處理。" />
+    <title>Stemroom — Demucs MV Studio</title>
+    <script type="module" crossorigin src="./index-E7pf529z.js"></script>
+    <link rel="stylesheet" crossorigin href="./index-BZkjL6zb.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="Stemroom 首頁"><span class="brand-mark">S</span><span>stemroom<span class="brand-dot">.</span></span></a>
+        <div class="top-note"><span class="privacy-dot"></span> 本機 AI 處理・檔案不會上傳</div>
+        <a class="top-link" href="https://github.com/timcsy/demucs-web" target="_blank" rel="noreferrer">關於 Demucs ↗</a>
+      </header>
+
+      <main id="top">
+        <section class="hero">
+          <div class="eyebrow"><span>DEMUX YOUR SOUND</span><span class="eyebrow-line"></span><span>01 / LISTEN DIFFERENT</span></div>
+          <h1>把每一層聲音<br /><em>聽得更清楚。</em></h1>
+          <p class="hero-copy">上傳一首歌，讓 Demucs 在你的瀏覽器中拆出人聲、鼓、貝斯與其他樂器。調整混音、升降 Key，再帶走你的版本。</p>
+          <div class="hero-meta"><span>01　匯入音訊或 MV</span><span>02　AI 分離四軌</span><span>03　混音・移調・下載</span></div>
+        </section>
+
+        <section class="workspace">
+          <aside class="left-column">
+            <div class="section-label"><span>01</span> YOUR TRACK</div>
+            <label class="drop-card" id="dropZone" for="fileInput">
+              <input id="fileInput" type="file" accept="audio/*,video/mp4,video/webm,video/quicktime" />
+              <span class="upload-icon">↥</span>
+              <strong>把音樂放在這裡</strong>
+              <span class="drop-sub">或點擊選擇音訊 / MV 檔案</span>
+              <span class="file-types">MP3 · WAV · M4A · MP4 · WEBM</span>
+            </label>
+            <div class="file-card" id="fileCard" hidden>
+              <div class="file-cover"><span>♫</span></div>
+              <div class="file-info"><strong id="fileName">尚未選擇</strong><span id="fileMeta">—</span></div>
+              <button class="icon-button" id="removeFile" aria-label="移除檔案">×</button>
+            </div>
+            <video id="videoPreview" class="video-preview" controls playsinline hidden></video>
+
+            <div class="model-card">
+              <div class="model-top"><span class="model-icon">✳</span><span>HTDEMUCS · ONNX</span><span class="live-tag" id="modelBadge"><i></i> 待命</span></div>
+              <h3>四軌分離模型</h3>
+              <p id="modelStatus">首次使用會載入約 172 MB 模型。模型會快取在你的瀏覽器。</p>
+              <div class="model-progress"><span id="modelProgress"></span></div>
+              <div class="model-bottom"><span id="backendInfo">檢測運算裝置中</span><span>FREE · PRIVATE</span></div>
+            </div>
+
+            <button class="primary-button" id="processBtn" disabled><span>開始分離音軌</span><b>↗</b></button>
+            <div class="processing" id="processing" hidden>
+              <div class="processing-head"><span id="statusText">準備中</span><span id="progressText">0%</span></div>
+              <div class="progress-track"><span id="processProgress"></span></div>
+              <div class="processing-foot"><span id="segmentText">載入模型後開始</span><span id="etaText">估計時間 —</span></div>
+            </div>
+            <p class="privacy-copy">⌁　音訊、影片與分離結果都留在此裝置。</p>
+          </aside>
+
+          <section class="right-column">
+            <div class="section-label"><span>02</span> THE MIXER <span class="section-hint" id="mixHint">等你放入一首歌</span></div>
+            <div class="mixer-card" id="mixerCard">
+              <div class="empty-mixer" id="emptyMixer"><div class="wave-mark">〰</div><strong>準備好聽見細節了嗎？</strong><p>匯入音樂並完成分離，四條獨立音軌會出現在這裡。</p></div>
+              <div class="mixer-content" id="mixerContent" hidden>
+                <div class="mixer-toolbar"><div><span class="mix-kicker">STEM MIXER</span><h2>你的聲音，你來決定。</h2></div><button class="text-button" id="resetMix">重設混音 ↺</button></div>
+                <div class="stem-list" id="stemList"></div>
+                <div class="master-row"><span>MASTER</span><div class="master-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span id="durationLabel">00:00</span></div>
+                <div class="transport"><button class="play-button" id="playMix" aria-label="播放混音">▶</button><div class="transport-track"><span id="currentTime">00:00</span><input id="seekBar" type="range" min="0" max="1000" value="0" /><span id="totalTime">00:00</span></div><button class="download-mix" id="downloadMix">下載伴奏 WAV ↓</button></div>
+              </div>
+            </div>
+
+            <div class="tool-grid">
+              <div class="tool-card key-card"><div class="tool-heading"><span class="tool-icon">♯</span><span class="tool-tag">PITCH SHIFT</span></div><h3>升降 Key</h3><p>讓整首混音跟上你的音域。</p><div class="key-controls"><button id="keyDown" aria-label="降低半音">−</button><strong id="keyValue">0 <small>半音</small></strong><button id="keyUp" aria-label="升高半音">+</button></div><div class="key-note" id="keyNote">原調</div><button class="secondary-button" id="downloadKey" disabled>下載移調版本 ↗</button><small class="tool-footnote">移調會同步改變播放速度</small></div>
+              <div class="tool-card video-card"><div class="tool-heading"><span class="tool-icon">▣</span><span class="tool-tag">VIDEO STUDIO</span></div><h3>伴奏 MV</h3><p>用分離後的混音搭配原始影片。</p><div class="video-feature"><span class="video-feature-icon">▷</span><span id="videoFeatureText">匯入影片後即可預覽畫面</span></div><button class="secondary-button" id="downloadMv" disabled>輸出伴奏 MV <span>↗</span></button><small class="tool-footnote">輸出 WEBM，需播放影片一次完成錄製</small></div>
+            </div>
+            <div class="notice" id="notice" role="status" aria-live="polite">✳　先選擇音訊或影片，再按「開始分離音軌」。</div>
+          </section>
+        </section>
+      </main>
+      <footer><span>STEMROOM <span class="brand-dot">·</span> A LOCAL-FIRST MUSIC TOOL</span><span>Made for the love of listening. <a href="https://github.com/timcsy/demucs-web" target="_blank" rel="noreferrer">Built with Demucs Web ↗</a></span></footer>
+    </div>
+  </body>
+</html>
